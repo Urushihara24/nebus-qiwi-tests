@@ -1,0 +1,148 @@
+{
+  "info": {
+    "name": "Nebus (MKK Luna) - QIWI API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Проверка доступности сервиса",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/payment-history/v2/persons/{{account}}/payments?rows=1",
+          "host": ["{{base_url}}"],
+          "path": ["payment-history", "v2", "persons", "{{account}}", "payments"],
+          "query": [{ "key": "rows", "value": "1" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Response is valid JSON', function () { pm.response.to.be.json; });",
+              "pm.test('Response has data array (service is alive)', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('data');",
+              "    pm.expect(jsonData.data).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Проверка баланса (> 0)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/funding-sources/v2/persons/{{account}}/accounts",
+          "host": ["{{base_url}}"],
+          "path": ["funding-sources", "v2", "persons", "{{account}}", "accounts"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Balance is greater than 0', function () {",
+              "    const jsonData = pm.response.json();",
+              "    const rubAccount = jsonData.accounts.find(acc => acc.currency === '643' && acc.type === 'ACCOUNT');",
+              "    pm.expect(rubAccount).to.exist;",
+              "    pm.expect(rubAccount.balance).to.be.a('number');",
+              "    pm.expect(rubAccount.balance).to.be.gt(0, 'Баланс должен быть строго больше 0');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Создание платежа (1 рубль)",
+      "request": {
+        "method": "PUT",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Content-Type", "value": "application/json" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": \"{{$guid}}\",\n  \"sum\": { \"amount\": 1.00, \"currency\": \"643\" },\n  \"paymentMethod\": { \"type\": \"Account\", \"accountId\": \"643\" },\n  \"fields\": { \"account\": \"79000000000\" }\n}"
+        },
+        "url": {
+          "raw": "{{base_url}}/sinap/api/v2/terms/99/payments/{{$guid}}",
+          "host": ["{{base_url}}"],
+          "path": ["sinap", "api", "v2", "terms", "99", "payments", "{{$guid}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200 or 201', function () { pm.expect(pm.response.code).to.be.oneOf([200, 201]); });",
+              "pm.test('Save payment ID for next test', function () {",
+              "    const jsonData = pm.response.json();",
+              "    if (jsonData && jsonData.id) {",
+              "        pm.collectionVariables.set('last_payment_id', jsonData.id);",
+              "    }",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Исполнение платежа (проверка статуса)",
+      "request": {
+        "method": "GET",
+        "header": [
+          { "key": "Authorization", "value": "Bearer {{token}}" },
+          { "key": "Accept", "value": "application/json" }
+        ],
+        "url": {
+          "raw": "{{base_url}}/sinap/api/v2/terms/99/payments/{{last_payment_id}}",
+          "host": ["{{base_url}}"],
+          "path": ["sinap", "api", "v2", "terms", "99", "payments", "{{last_payment_id}}"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('Status code is 200', function () { pm.response.to.have.status(200); });",
+              "pm.test('Payment is executed (SUCCESS)', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.transaction.state.code).to.eql('SUCCESS');",
+              "});",
+              "pm.test('Executed amount is exactly 1.00', function () {",
+              "    const jsonData = pm.response.json();",
+              "    pm.expect(jsonData.sum.amount).to.eql(1.00);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "last_payment_id", "value": "" }
+  ]
+}
