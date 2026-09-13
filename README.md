@@ -1,43 +1,50 @@
-# API-тесты для МКК «Луна» (Небус)
+# API Tests for MCC “Luna” (Nebus)
 
-Решение тестового задания: проверка API платежного шлюза на основе документации QIWI.
+Test assignment solution: validating a payment gateway API based on QIWI documentation.
 
-## Стек
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.12-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/pytest-34A853?style=for-the-badge&logo=pytest&logoColor=white" alt="pytest">
+  <img src="https://img.shields.io/badge/Playwright-45BA4B?style=for-the-badge&logo=playwright&logoColor=white" alt="Playwright">
+  <img src="https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white" alt="Postman">
+</p>
+
+## Stack
 
 - **Python 3.12** + **pytest**
-- **Playwright** (APIRequestContext)
-- **Postman** (коллекция приложена)
+- **Playwright** (`APIRequestContext`)
+- **Postman** (collection included)
 
-## Запуск
+## Run
 
-1.  Создать виртуальное окружение и активировать его:
+1. Create and activate a virtual environment:
     ```bash
     python3 -m venv venv
-    source venv/bin/activate # На Linux/Mac
-    # venv\Scripts\activate # На Windows
+    source venv/bin/activate # Linux/macOS
+    # venv\Scripts\activate # Windows
     ```
-2.  Установить зависимости:
+2. Install dependencies:
     ```bash
     pip install -r requirements.txt
     playwright install
     ```
-3.  Создать файл `.env` в корне проекта с тестовыми данными:
+3. Create a `.env` file in the project root with test data:
     ```env
     QIWI_BASE_URL=https://edge.qiwi.com
-    QIWI_TOKEN=ваш_тестовый_токен
-    QIWI_ACCOUNT=ваш_тестовый_номер_телефона
+    QIWI_TOKEN=your_test_token
+    QIWI_ACCOUNT=your_test_phone_number
     ```
-4.  Запустить тесты:
+4. Run the tests:
     ```bash
     pytest -v -s test_qiwi_api.py
     ```
 
-## Что проверяем
+## What is tested
 
-1.  **Доступность сервиса**: GET-запрос к истории платежей. Проверка HTTP 200 и структуры ответа (наличие ключа `data`).
-2.  **Проверка баланса**: GET-запрос к источникам финансирования. Поиск рублевого счета (`currency: "643"`, `type: "ACCOUNT"`). Строгая проверка `balance > 0`.
-3.  **Создание платежа**: PUT-запрос на создание платежа (терминал `99` — мобильный телефон). Генерация уникального `payment_id`, отправка запроса на 1 рубль.
-4.  **Исполнение платежа**: GET-запрос для получения статуса ранее созданного платежа. Проверка перехода в статус `SUCCESS` и корректной суммы по созданному `payment_id`.
+1. **Service availability**: GET request to payment history. Verifies HTTP 200 and the response structure, including the `data` key.
+2. **Balance check**: GET request to funding sources. Finds a RUB account (`currency: "643"`, `type: "ACCOUNT"`) and strictly verifies `balance > 0`.
+3. **Payment creation**: PUT request to create a payment (terminal `99` — mobile phone). Generates a unique `payment_id` and submits a 1 RUB payment.
+4. **Payment execution**: GET request to retrieve the status of the previously created payment. Verifies transition to `SUCCESS` and the correct amount for the generated `payment_id`.
 
 > [!NOTE]
-> Согласно ТЗ, сервис не является рабочим. Тесты ожидаемо падают с HTTP-ошибками (401/404/500) при использовании тестовых токенов. Код демонстрирует архитектуру проверок, работу с `.env` и передачу данных между шагами.
+> According to the assignment, the service is not operational. The tests are therefore expected to fail with HTTP errors such as 401/404/500 when test tokens are used. The code demonstrates test architecture, `.env` configuration, and passing data between test steps.
