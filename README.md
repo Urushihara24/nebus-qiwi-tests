@@ -1,5 +1,7 @@
 # API Tests for MCC “Luna” (Nebus)
 
+> QA automation practice / test assignment focused on payment-gateway API flows, state transitions, and test-data handling.
+
 Test assignment solution: validating a payment gateway API based on QIWI documentation.
 
 <p align="center">
@@ -28,7 +30,7 @@ Test assignment solution: validating a payment gateway API based on QIWI documen
     pip install -r requirements.txt
     playwright install
     ```
-3. Create a `.env` file in the project root with test data:
+3. Create a `.env` file in the project root with authorized test data:
     ```env
     QIWI_BASE_URL=https://edge.qiwi.com
     QIWI_TOKEN=your_test_token
@@ -38,6 +40,9 @@ Test assignment solution: validating a payment gateway API based on QIWI documen
     ```bash
     pytest -v -s test_qiwi_api.py
     ```
+
+> [!CAUTION]
+> The suite contains payment-creation logic from the original assignment. Run it only with credentials and an environment where those actions are explicitly authorized.
 
 ## What is tested
 
