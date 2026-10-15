@@ -95,3 +95,11 @@ The upstream payment endpoint used by this implementation may be unavailable, re
 ## Safety boundary
 
 This repository is an API QA implementation, not a payment client for end users. It does not ship credentials and should not be configured with an account that is not explicitly authorized for testing.
+
+---
+
+## Related QA & engineering work
+
+- **[DummyJSON API Regression Suite](https://github.com/Urushihara24/DummyJSON_Test)** — pytest/requests API automation with CI and dependency audit.
+- **[Auto-Pricing Bot](https://github.com/Urushihara24/monitoring-bot)** — production marketplace automation with seller APIs, Docker and write-safety controls.
+- **[Portfolio](https://vsevolodqa.ru/)** · **[Telegram](https://t.me/vsevolod_qa)** · **[GitHub profile](https://github.com/Urushihara24)**
